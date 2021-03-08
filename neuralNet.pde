@@ -6,13 +6,14 @@ int maxN = 30;
 int itL = 6;
 int index = 0;
 
+
 float [][] data = new float[maxL * itL][maxN];
 
 void setup() {
 	background(0);
 	size(1200, 1200);
 	//beginRecord(PDF, "data1.pdf");
-	colorMode(HSB);
+	//colorMode(HSB);
 	trainSet = loadBytes("train-images.idx3-ubyte");
 	lableSet = loadBytes("train-labels.idx1-ubyte");
 	//nn = new neuralNetwork(new int[]{784, 500, 300, 10});
@@ -20,6 +21,12 @@ void setup() {
 }
 
 void draw() {
+  stroke(255);
+  strokeWeight(100);
+  if (mousePressed) line(pmouseX, pmouseY, mouseX, mouseY);
+  float [] arr = createInput();
+  nn.forwardProp(arr);
+  println(nn.evaluate());
 	//float sum = 0;
 	//for (int i = 0; i < 100; i++) {
 	//	float [] input = getMNISTInput(index);
@@ -70,9 +77,45 @@ void draw() {
 	//}
 }
 
-void mousePressed() {
-	noStroke();
-	circle(mouseX, mouseY, 100);
+void keyPressed() {
+  if (key == 'C' || key == 'c') background(0);
+}
+
+float[] createInput() {
+  int dw = floor(width / 28);
+  int dh = floor(height / 28);
+  float[] arr = new float[28 * 28];
+  for (int i = 0; i < 28; i++) {
+    for (int j = 0; j < 28; j++) {
+      color c = averageCol(i * dw, j * dh, dw, dh);
+      arr[i + j * 28] = map(brightness(c), 0, 255, 0, 1);
+    }
+  }
+  return arr;
+}
+
+void showInput(float [] arr) {
+  int dw = floor(width / 28);
+  int dh = floor(height / 28);
+  for (int i = 0; i < 28; i++) {
+    for (int j = 0; j < 28; j++) {
+      fill(arr[j + i * 28] * 255);
+      rect(i * dw, j * dh, dw, dh);
+    }
+  }
+}
+
+color averageCol(int x, int y, int w, int h) {
+  PVector col = new PVector(0, 0, 0);
+  for (int i = x; i <= x + w; i++) {
+    for (int j = y; j <= y + h; j++) {
+      col.x += red(get(x, y));
+      col.y += green(get(x, y));
+      col.z += blue(get(x, y));
+    }
+  }
+  col.div(w * h);
+  return color(col.x, col.y, col.z);
 }
 
 
